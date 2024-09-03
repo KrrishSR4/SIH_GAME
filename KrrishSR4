@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Groundwater Conservation Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            z-index: 100;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">Use Arrow Keys to Move the Cube (Character)</div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
+
+// Basic Setup for Three.js
+let scene, camera, renderer, cube;
+let moveSpeed = 0.1;
+
+// Initialize the scene
+function init() {
+    scene = new THREE.Scene();
+
+    // Create a camera
+    camera = new THREE.PerspectiveCamera(
+        75, // Field of view
+        window.innerWidth / window.innerHeight, // Aspect ratio
+        0.1, // Near clipping plane
+        1000 // Far clipping plane
+    );
+
+    camera.position.z = 5; // Move the camera back so we can see the cube
+
+    // Create a WebGL renderer
+    renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Create a cube (this represents the character)
+    let geometry = new THREE.BoxGeometry();
+    let material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    cube = new THREE.Mesh(geometry, material);
+
+    scene.add(cube); // Add the cube to the scene
+
+    // Lighting (optional)
+    let ambientLight = new THREE.AmbientLight(0x404040);
+    scene.add(ambientLight);
+
+    // Add event listeners for key controls
+    document.addEventListener('keydown', onDocumentKeyDown, false);
+
+    animate();
+}
+
+// Control the cube's movement with arrow keys
+function onDocumentKeyDown(event) {
+    let keyCode = event.which;
+
+    // Move cube with arrow keys
+    if (keyCode === 37) { // Left arrow
+        cube.position.x -= moveSpeed;
+    } else if (keyCode === 38) { // Up arrow
+        cube.position.y += moveSpeed;
+    } else if (keyCode === 39) { // Right arrow
+        cube.position.x += moveSpeed;
+    } else if (keyCode === 40) { // Down arrow
+        cube.position.y -= moveSpeed;
+    }
+}
+
+// Animation loop
+function animate() {
+    requestAnimationFrame(animate);
+
+    // Rotate the cube for some visual effect
+    cube.rotation.x += 0.01;
+    cube.rotation.y += 0.01;
+
+    renderer.render(scene, camera);
+}
+
+// Start the game
+init();
+
+
+
+
+
+
+from flask import Flask, render_template, request, jsonify
+
+app = Flask(__name__)
+
+# Placeholder for storing scores
+scores = {}
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/submit_score', methods=['POST'])
+def submit_score():
+    data = request.get_json()
+    username = data['username']
+    score = data['score']
+    scores[username] = score
+    return jsonify({'status': 'success', 'message': 'Score submitted'})
+
+@app.route('/get_scores', methods=['GET'])
+def get_scores():
+    return jsonify(scores)
+
+if __name__ == '__main__':
+    app.run(debug=True)
